@@ -46,6 +46,7 @@ dependencies:
   file_picker: ^5.2.5
   babylonjs_viewer: ^1.2.1
   webview_flutter: ^2.8.0
+  shared_preferences: ^2.0.18
 
 
 dev_dependencies:

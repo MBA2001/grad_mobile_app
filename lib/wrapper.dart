@@ -14,6 +14,7 @@ import 'package:gradproject/pages/gallery.dart';
 import 'package:gradproject/pages/login.dart';
 import 'package:gradproject/providers/user_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Wrapper extends StatefulWidget {
   Wrapper({Key? key}) : super(key: key);
@@ -29,10 +30,33 @@ class _WrapperState extends State<Wrapper> {
   final List<Widget> pages = [Home(), Gallery(), ThreeDGallery(), Account()];
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp)async {
+      final auth = Provider.of<UserProvider>(context, listen: false);
+      final prefs = await SharedPreferences.getInstance();
+      String? email = prefs.getString('email');
+      String? password = prefs.getString('password');
+
+      if(email != null && password != null){
+        auth.signIn(email, password);
+      }else{
+        Navigator.pushNamed(context, '/login');
+      }
+    });
+
+    // Future.delayed(Duration(seconds: 20),(){
+    //   Navigator.pushNamed(context, '/login');
+    // });
+  }
+
+
+  @override
   Widget build(BuildContext context) {
     User? user = context.watch<UserProvider>().user;
     if (user == null) {
-      return LogIn();
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     } else {
       return Scaffold(
         appBar: AppBar(

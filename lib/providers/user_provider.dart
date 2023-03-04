@@ -5,10 +5,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:gradproject/models/user.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserProvider extends ChangeNotifier {
   final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
+
   User? _user;
   final List<User> _users = [];
 
@@ -16,6 +18,7 @@ class UserProvider extends ChangeNotifier {
   List<User> get users => _users;
 
   signIn(String email, String password) async {
+    final prefs = await SharedPreferences.getInstance();
     final credential = await _auth.signInWithEmailAndPassword(
         email: email, password: password);
     if (_users.isEmpty) {
@@ -37,6 +40,8 @@ class UserProvider extends ChangeNotifier {
       }
       if (found) {
         await getImages();
+        prefs.setString('email',email);
+        prefs.setString('password',password);
         notifyListeners();
         return;
       }
@@ -45,6 +50,8 @@ class UserProvider extends ChangeNotifier {
         if (item.email == email) {
           _user = User(item.uid, item.email, item.username, item.image);
           await getImages();
+          prefs.setString('email',email);
+          prefs.setString('password',password);
           notifyListeners();
           return;
         }
@@ -53,6 +60,7 @@ class UserProvider extends ChangeNotifier {
   }
 
   createUser(String email, String password, String name) async {
+    final prefs = await SharedPreferences.getInstance();
     final credential = await _auth.createUserWithEmailAndPassword(
         email: email, password: password);
     String image =
@@ -80,14 +88,18 @@ class UserProvider extends ChangeNotifier {
     }
 
     _user = User(credential.user!.uid, email, name, image);
+    prefs.setString('email',email);
+    prefs.setString('password',password);
     notifyListeners();
   }
 
   signOut() async {
+    final prefs = await SharedPreferences.getInstance();
     await _auth.signOut();
     _user = null;
     _users.clear();
-
+    prefs.remove('email');
+    prefs.remove('password');
     notifyListeners();
   }
 

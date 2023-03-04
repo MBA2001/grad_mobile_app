@@ -32,6 +32,7 @@ class _LogInState extends State<LogIn> {
   _signInValidation(authservice) async {
     try {
       await authservice.signIn(emailController.text, passwordController.text);
+      Navigator.pop(context);
     } catch (e) {
       print(e.toString());
       _validateEmail = false;
