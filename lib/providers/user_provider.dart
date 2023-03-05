@@ -40,8 +40,8 @@ class UserProvider extends ChangeNotifier {
       }
       if (found) {
         await getImages();
-        prefs.setString('email',email);
-        prefs.setString('password',password);
+        prefs.setString('email', email);
+        prefs.setString('password', password);
         notifyListeners();
         return;
       }
@@ -50,8 +50,8 @@ class UserProvider extends ChangeNotifier {
         if (item.email == email) {
           _user = User(item.uid, item.email, item.username, item.image);
           await getImages();
-          prefs.setString('email',email);
-          prefs.setString('password',password);
+          prefs.setString('email', email);
+          prefs.setString('password', password);
           notifyListeners();
           return;
         }
@@ -88,8 +88,8 @@ class UserProvider extends ChangeNotifier {
     }
 
     _user = User(credential.user!.uid, email, name, image);
-    prefs.setString('email',email);
-    prefs.setString('password',password);
+    prefs.setString('email', email);
+    prefs.setString('password', password);
     notifyListeners();
   }
 
@@ -106,12 +106,12 @@ class UserProvider extends ChangeNotifier {
   Future<void> uploadImage(String filePath, String fileName) async {
     File file = File(filePath);
     final name = user!.username;
-    try{
+    try {
       await _storage.ref('$name/$fileName').putFile(file);
       user!.patientsImages.clear();
       user!.patientsNames.clear();
       getImages();
-    }on FirebaseException catch(e){
+    } on FirebaseException catch (e) {
       print(e);
     }
   }
@@ -125,5 +125,21 @@ class UserProvider extends ChangeNotifier {
       user!.addPatientImage(image);
     });
   }
-  
+
+  upvoteModel(String name) async {
+    QuerySnapshot<Map<String, dynamic>> database =
+        await FirebaseFirestore.instance.collection('models').get();
+    List<Map<String, dynamic>> data =
+        database.docs.map((doc) => doc.data()).toList();
+    for (var item in data) {
+      if (item['name'] == name) {
+        print(item);
+        await FirebaseFirestore.instance.collection('models').doc(item['uid']).set({
+          'name': item['name'],
+          'upvotes': item['upvotes']+1,
+          'uid': item['uid'],
+        });
+      }
+    }
+  }
 }

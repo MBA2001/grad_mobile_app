@@ -14,6 +14,7 @@ class Gallery extends StatefulWidget {
 class _GalleryState extends State<Gallery> {
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
     final user = Provider.of<UserProvider>(context).user!;
     List<String> patients = user.patientsImages;
     List<String> patientNames = user.patientsNames;
@@ -30,7 +31,8 @@ class _GalleryState extends State<Gallery> {
                 icon: Image.network(patients[index]),
                 iconSize: 100,
                 onPressed: () {
-                  Navigator.pushNamed(context, '/threed');
+                  showDataAlert(patients, index,userProvider);
+                  // Navigator.pushNamed(context, '/threed');
                 },
               ),
               Text(patientNames[index]),
@@ -39,5 +41,148 @@ class _GalleryState extends State<Gallery> {
         );
       },
     );
+  }
+
+  showDataAlert(patients, int index,userProvider) {
+    final models = ['CNN', 'Resnet', 'AlexNet'];
+    String value = 'CNN';
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(
+                  20.0,
+                ),
+              ),
+            ),
+            contentPadding: const EdgeInsets.only(
+              top: 10.0,
+            ),
+            title: const Text(
+              "Choose A model",
+              style: TextStyle(fontSize: 24.0),
+            ),
+            content: Container(
+              height: 400,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(5, 0, 5, 4),
+                            child: Column(
+                              children: [
+                                IconButton(
+                                  icon: ClipRRect(
+                                      borderRadius: BorderRadius.circular(20),
+                                      child: Image.network(patients[index])),
+                                  iconSize: 100,
+                                  onPressed: () {
+                                    Navigator.pushNamed(context, '/threed');
+                                  },
+                                ),
+                                Text(models[0]),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(5, 0, 5, 4),
+                            child: Column(
+                              children: [
+                                IconButton(
+                                  icon: ClipRRect(
+                                      borderRadius: BorderRadius.circular(20),
+                                      child: Image.network(patients[index])),
+                                  iconSize: 100,
+                                  onPressed: () {
+                                    Navigator.pushNamed(context, '/threed');
+                                  },
+                                ),
+                                Text(models[1]),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(5, 0, 5, 4),
+                        child: Column(
+                          children: [
+                            IconButton(
+                              icon: ClipRRect(
+                                  borderRadius: BorderRadius.circular(20),
+                                  child: Image.network(patients[index])),
+                              iconSize: 100,
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/threed');
+                              },
+                            ),
+                            Text(models[2]),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      const Text('choose the best model'),
+                      Row(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              userProvider.upvoteModel('CNN');
+                              Navigator.pop(context);
+                            },
+                            child: Text('CNN'),
+                            style: ElevatedButton.styleFrom(
+                              shape: CircleBorder(),
+                              padding: EdgeInsets.all(20),
+                              backgroundColor: Colors.white, // <-- Button color
+                              foregroundColor: Colors.black, // <-- Splash color
+                            ),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              userProvider.upvoteModel('Resnet');
+                              Navigator.pop(context);
+                            },
+                            child: Text('Resnet'),
+                            style: ElevatedButton.styleFrom(
+                              shape: CircleBorder(),
+                              padding: EdgeInsets.all(20),
+                              backgroundColor: Colors.white, // <-- Button color
+                              foregroundColor: Colors.black, // <-- Splash color
+                            ),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              userProvider.upvoteModel('Alexnet');
+                              Navigator.pop(context);
+                            },
+                            child: Text('AlexNet'),
+                            style: ElevatedButton.styleFrom(
+                              shape: CircleBorder(),
+                              padding: EdgeInsets.all(20),
+                              backgroundColor: Colors.white, // <-- Button color
+                              foregroundColor: Colors.black, // <-- Splash color
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        });
   }
 }
