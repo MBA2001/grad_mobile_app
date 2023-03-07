@@ -7,6 +7,7 @@ class User {
   String image;
   List<String> patientsImages = [];
   List<String> patientsNames= [];
+  List<String> patientsPredictions = [];
   List<CameraDescription>? cameras;
 
   User(this.uid,this.email,this.username,this.image);
@@ -18,4 +19,9 @@ class User {
   addPatientName(String patientName){
     patientsNames.add(patientName);
   }
+
+  addPatientPrediction(String patientprediction){
+    patientsPredictions.add(patientprediction);
+  }
+  
 }

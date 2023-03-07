@@ -86,11 +86,19 @@ class _HomeState extends State<Home> {
                 final filename = PatientNameController.text + '.' + extenstion!;
                 print(filename);
                 userProvider.uploadImage(path!, filename).then((value) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Image Uploaded successfully'),
-                    ),
-                  );
+                  if (value) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Image Uploaded successfully'),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Please upload an Image of a face'),
+                      ),
+                    );
+                  }
                 });
               }
             },

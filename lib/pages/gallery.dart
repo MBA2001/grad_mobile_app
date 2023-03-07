@@ -18,6 +18,7 @@ class _GalleryState extends State<Gallery> {
     final user = Provider.of<UserProvider>(context).user!;
     List<String> patients = user.patientsImages;
     List<String> patientNames = user.patientsNames;
+    List<String> patientsPredictions = user.patientsPredictions;
     return ListView.builder(
       padding: EdgeInsets.zero,
       scrollDirection: Axis.horizontal,
@@ -31,7 +32,7 @@ class _GalleryState extends State<Gallery> {
                 icon: Image.network(patients[index]),
                 iconSize: 100,
                 onPressed: () {
-                  showDataAlert(patients, index,userProvider);
+                  showDataAlert(patientsPredictions, index,userProvider);
                   // Navigator.pushNamed(context, '/threed');
                 },
               ),
@@ -83,7 +84,7 @@ class _GalleryState extends State<Gallery> {
                                 IconButton(
                                   icon: ClipRRect(
                                       borderRadius: BorderRadius.circular(20),
-                                      child: Image.network(patients[index])),
+                                      child: Image.network(patients[index*2])),
                                   iconSize: 100,
                                   onPressed: () {
                                     Navigator.pushNamed(context, '/threed');
@@ -100,7 +101,7 @@ class _GalleryState extends State<Gallery> {
                                 IconButton(
                                   icon: ClipRRect(
                                       borderRadius: BorderRadius.circular(20),
-                                      child: Image.network(patients[index])),
+                                      child: Image.network(patients[index*2+1])),
                                   iconSize: 100,
                                   onPressed: () {
                                     Navigator.pushNamed(context, '/threed');
@@ -119,7 +120,7 @@ class _GalleryState extends State<Gallery> {
                             IconButton(
                               icon: ClipRRect(
                                   borderRadius: BorderRadius.circular(20),
-                                  child: Image.network(patients[index])),
+                                  child: Image.network(patients[index*2])),
                               iconSize: 100,
                               onPressed: () {
                                 Navigator.pushNamed(context, '/threed');

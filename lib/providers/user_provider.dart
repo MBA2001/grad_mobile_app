@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart' as auth;
@@ -6,6 +7,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:gradproject/models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class UserProvider extends ChangeNotifier {
   final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
@@ -103,27 +105,44 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> uploadImage(String filePath, String fileName) async {
+  Future<bool> uploadImage(String filePath, String fileName) async {
     File file = File(filePath);
     final name = user!.username;
     try {
       await _storage.ref('$name/$fileName').putFile(file);
+      bool prediction = await detectFace(fileName);
       user!.patientsImages.clear();
       user!.patientsNames.clear();
+      user!.patientsPredictions.clear();
       getImages();
+
+      if (prediction) {
+        return true;
+      } else {
+        return false;
+      }
     } on FirebaseException catch (e) {
       print(e);
+      return false;
     }
   }
 
   getImages() async {
     final name = user!.username;
     ListResult results = await _storage.ref('/$name').listAll();
-    results.items.forEach((ref) async {
+    for (var ref in results.items) {
       String image = await ref.getDownloadURL();
       user!.addPatientName(ref.name);
       user!.addPatientImage(image);
-    });
+      ListResult ress = await _storage
+          .ref('/$name/' + ref.name.split('.')[0])
+          .listAll();
+      for (var reff in ress.items) {
+        String image = await reff.getDownloadURL();
+        user!.addPatientPrediction(image);
+      }
+    }
+    print(user!.patientsPredictions);
   }
 
   upvoteModel(String name) async {
@@ -134,12 +153,56 @@ class UserProvider extends ChangeNotifier {
     for (var item in data) {
       if (item['name'] == name) {
         print(item);
-        await FirebaseFirestore.instance.collection('models').doc(item['uid']).set({
+        await FirebaseFirestore.instance
+            .collection('models')
+            .doc(item['uid'])
+            .set({
           'name': item['name'],
-          'upvotes': item['upvotes']+1,
+          'upvotes': item['upvotes'] + 1,
           'uid': item['uid'],
         });
       }
+    }
+  }
+
+  detectFace(String fileName) async {
+    final name = user!.username;
+    final ref = _storage.ref('$name/$fileName');
+    String url = await ref.getDownloadURL();
+    final res = await http.post(Uri.parse('http://10.0.2.2:5000/face'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{"url": url}));
+    if (jsonDecode(res.body)['data'] == 'false') {
+      await ref.delete();
+      return false;
+    } else {
+      final r = await predictImage(url, fileName);
+      if (r) {
+        return true;
+      } else {
+        await ref.delete();
+        return false;
+      }
+    }
+  }
+
+  predictImage(String url, String filename) async {
+    final name = user!.username;
+    final res = await http.post(Uri.parse('http://10.0.2.2:5000/predict'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          "url": url,
+          "name": filename.split('.')[0],
+          "doctor": name
+        }));
+    if (jsonDecode(res.body)['data'] == 'true') {
+      return true;
+    } else {
+      return false;
     }
   }
 }
