@@ -87,7 +87,7 @@ class _GalleryState extends State<Gallery> {
                                       child: Image.network(patients[index*2])),
                                   iconSize: 100,
                                   onPressed: () {
-                                    Navigator.pushNamed(context, '/threed');
+                                    Navigator.of(context).push(MaterialPageRoute(builder:(context)=>ThreeDViewer(xx: index,)));
                                   },
                                 ),
                                 Text(models[0]),
@@ -104,7 +104,7 @@ class _GalleryState extends State<Gallery> {
                                       child: Image.network(patients[index*2+1])),
                                   iconSize: 100,
                                   onPressed: () {
-                                    Navigator.pushNamed(context, '/threed');
+                                    Navigator.of(context).push(MaterialPageRoute(builder:(context)=>ThreeDViewer(xx: index,)));
                                   },
                                 ),
                                 Text(models[1]),
@@ -123,7 +123,7 @@ class _GalleryState extends State<Gallery> {
                                   child: Image.network(patients[index*2])),
                               iconSize: 100,
                               onPressed: () {
-                                Navigator.pushNamed(context, '/threed');
+                                Navigator.of(context).push(MaterialPageRoute(builder:(context)=>ThreeDViewer(xx: index,)));
                               },
                             ),
                             Text(models[2]),

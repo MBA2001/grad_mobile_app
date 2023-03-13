@@ -48,7 +48,6 @@ class MyApp extends StatelessWidget {
           '/login': (context) => LogIn(),
           '/register': (context) => SignUp(),
           '/settings': (context) => Account(),
-          '/threed': (context) => ThreeDViewer(),
         },
       ),
     );
