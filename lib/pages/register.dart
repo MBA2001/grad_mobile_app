@@ -85,6 +85,8 @@ class _SignUpState extends State<SignUp> {
       await userProvider.createUser(emailController.text,
           passwordController.text, usernameController.text);
       Navigator.pop(context);
+      Navigator.pop(context);
+
     } catch (e) {
       if (e.toString().contains('email address is already in use')) {
         setState(() {

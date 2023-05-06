@@ -33,15 +33,16 @@ class UserProvider extends ChangeNotifier {
       for (var item in data) {
         if (item['email'] == email) {
           _user = User(item['uid'], item['email'], item['username'],
-              item['image'] ?? []);
+              item['image'] ?? [],item['schedule']);
           found = true;
         } else {
           _users.add(User(item['uid'], item['email'], item['username'],
-              item['image'] ?? []));
+              item['image'] ?? [],item['schedule']));
         }
       }
       if (found) {
         await getImages();
+        user!.addSchedule();
         prefs.setString('email', email);
         prefs.setString('password', password);
         notifyListeners();
@@ -50,8 +51,9 @@ class UserProvider extends ChangeNotifier {
     } else {
       for (var item in _users) {
         if (item.email == email) {
-          _user = User(item.uid, item.email, item.username, item.image);
+          _user = User(item.uid, item.email, item.username, item.image,item.schedule);
           await getImages();
+          user!.addSchedule();
           prefs.setString('email', email);
           prefs.setString('password', password);
           notifyListeners();
@@ -75,6 +77,7 @@ class UserProvider extends ChangeNotifier {
       'email': email,
       'image': image,
       'uid': credential.user!.uid,
+      'schedule': {}
     });
     QuerySnapshot<Map<String, dynamic>> database =
         await FirebaseFirestore.instance.collection('users').get();
@@ -83,13 +86,14 @@ class UserProvider extends ChangeNotifier {
     bool found = false;
     for (var item in data) {
       User user = User(
-          item['uid'], item['email'], item['username'], item['image'] ?? []);
+          item['uid'], item['email'], item['username'], item['image'] ?? [],item['schedule']);
       if (user.email != email) {
         _users.add(user);
       }
     }
 
-    _user = User(credential.user!.uid, email, name, image);
+    _user = User(credential.user!.uid, email, name, image,{});
+    user!.addSchedule();
     prefs.setString('email', email);
     prefs.setString('password', password);
     notifyListeners();
@@ -205,4 +209,40 @@ class UserProvider extends ChangeNotifier {
       return false;
     }
   }
+
+  UpdateSchedule() async {
+    Map updatedSchedule = {};
+
+    user!.schedule.forEach((key, value) { 
+      for(var i in user!.schedule[key]){
+        
+        updatedSchedule[key] == null? updatedSchedule[key] = [i.toString()] : updatedSchedule[key].add(i.toString()); 
+      }
+    });
+    print('xx');
+    print(updatedSchedule);
+    QuerySnapshot<Map<String, dynamic>> database =
+        await FirebaseFirestore.instance.collection('users').get();
+    List<Map<String, dynamic>> data =
+        database.docs.map((doc) => doc.data()).toList();
+    for (var item in data) {
+      if (item['uid'] == user!.uid) {
+        
+        print(user);
+        print(user!.schedule);
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(item['uid'])
+            .set({
+          'email': user!.email,
+          'image': user!.image,
+          'uid': user!.uid,
+          'username': user!.username,
+          'schedule': updatedSchedule
+        });
+      }
+    }
+  }
+
+
 }

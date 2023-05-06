@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gradproject/models/user.dart';
 import 'package:gradproject/pages/threed.dart';
 import 'package:gradproject/providers/user_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Gallery extends StatefulWidget {
   Gallery({Key? key}) : super(key: key);
@@ -32,7 +34,7 @@ class _GalleryState extends State<Gallery> {
                 icon: Image.network(patients[index]),
                 iconSize: 100,
                 onPressed: () {
-                  showDataAlert(patientsPredictions, index,userProvider);
+                  showDataAlert(patientsPredictions, index, userProvider, user,patientNames);
                   // Navigator.pushNamed(context, '/threed');
                 },
               ),
@@ -44,9 +46,20 @@ class _GalleryState extends State<Gallery> {
     );
   }
 
-  showDataAlert(patients, int index,userProvider) {
+  openModel(List<String> patients, index, user) async {
+    Uri url = Uri.parse(
+        "http://192.168.1.36:8080/website/index.html#model=assets/" +
+            patients[index].split('.')[0] +
+            "_" +
+            user.username +
+            ".obj");
+    if (!await launchUrl(url)) {
+    throw Exception('Could not launch $url');
+  }
+  }
+
+  showDataAlert(patients, int index, userProvider, User user,List<String> patientNames) {
     final models = ['CNN', 'Resnet', 'AlexNet'];
-    String value = 'CNN';
     showDialog(
         context: context,
         builder: (context) {
@@ -84,10 +97,11 @@ class _GalleryState extends State<Gallery> {
                                 IconButton(
                                   icon: ClipRRect(
                                       borderRadius: BorderRadius.circular(20),
-                                      child: Image.network(patients[index*2])),
+                                      child:
+                                          Image.network(patients[index * 2])),
                                   iconSize: 100,
-                                  onPressed: () {
-                                    Navigator.of(context).push(MaterialPageRoute(builder:(context)=>ThreeDViewer(xx: index,)));
+                                  onPressed: ()async{
+                                    await openModel(patientNames,index,user);
                                   },
                                 ),
                                 Text(models[0]),
@@ -101,10 +115,11 @@ class _GalleryState extends State<Gallery> {
                                 IconButton(
                                   icon: ClipRRect(
                                       borderRadius: BorderRadius.circular(20),
-                                      child: Image.network(patients[index*2+1])),
+                                      child: Image.network(
+                                          patients[index * 2 + 1])),
                                   iconSize: 100,
-                                  onPressed: () {
-                                    Navigator.of(context).push(MaterialPageRoute(builder:(context)=>ThreeDViewer(xx: index,)));
+                                  onPressed: ()async{
+                                    await openModel(patientNames,index,user);
                                   },
                                 ),
                                 Text(models[1]),
@@ -120,11 +135,11 @@ class _GalleryState extends State<Gallery> {
                             IconButton(
                               icon: ClipRRect(
                                   borderRadius: BorderRadius.circular(20),
-                                  child: Image.network(patients[index*2])),
+                                  child: Image.network(patients[index * 2])),
                               iconSize: 100,
-                              onPressed: () {
-                                Navigator.of(context).push(MaterialPageRoute(builder:(context)=>ThreeDViewer(xx: index,)));
-                              },
+                              onPressed: ()async{
+                                    await openModel(patientNames,index,user);
+                                  },
                             ),
                             Text(models[2]),
                           ],
@@ -177,7 +192,6 @@ class _GalleryState extends State<Gallery> {
                           ),
                         ],
                       ),
-                      
                     ],
                   ),
                 ),

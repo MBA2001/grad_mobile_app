@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gradproject/models/user.dart';
-
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 //* MY Pages
 import 'package:gradproject/pages/home.dart';
 import 'package:gradproject/pages/account.dart';
@@ -14,7 +14,9 @@ import 'package:gradproject/pages/gallery.dart';
 import 'package:gradproject/pages/login.dart';
 import 'package:gradproject/providers/user_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:gradproject/pages/schedule.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:gradproject/pages/treatment.dart';
 
 class Wrapper extends StatefulWidget {
   Wrapper({Key? key}) : super(key: key);
@@ -25,23 +27,23 @@ class Wrapper extends StatefulWidget {
 
 class _WrapperState extends State<Wrapper> {
   int currentIndex = 0;
-  final List<String> titles = ['Home', 'Search', 'Notifications'];
+  final List<String> titles = ['Home', 'Search', 'schedules','treatment'];
 
-  final List<Widget> pages = [Home(), Gallery(), ThreeDGallery(), Account()];
-
+  final List<Widget> pages = [Home(), Gallery(), Schedule(),Treatment()];
+  bool signout = false;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp)async {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       final auth = Provider.of<UserProvider>(context, listen: false);
       final prefs = await SharedPreferences.getInstance();
       String? email = prefs.getString('email');
       String? password = prefs.getString('password');
 
-      if(email != null && password != null){
+      if (email != null && password != null) {
         auth.signIn(email, password);
-      }else{
+      } else {
         Navigator.pushNamed(context, '/login');
       }
     });
@@ -51,18 +53,25 @@ class _WrapperState extends State<Wrapper> {
     // });
   }
 
-
   @override
   Widget build(BuildContext context) {
     User? user = context.watch<UserProvider>().user;
-    if (user == null) {
+    if (user == null && !signout) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    } else if (user == null && signout) {
+      Future.delayed(Duration(milliseconds: 50), () {
+        Navigator.pushNamed(context, '/login');
+      });
+      return SizedBox();
     } else {
+      setState(() {
+        signout = true;
+      });
       return Scaffold(
         appBar: AppBar(
           title: Text('Cure',
-              style:
-                  GoogleFonts.sacramento(textStyle: const TextStyle(fontSize: 30))),
+              style: GoogleFonts.sacramento(
+                  textStyle: const TextStyle(fontSize: 30))),
           actions: [
             IconButton(
                 onPressed: () {
@@ -92,11 +101,11 @@ class _WrapperState extends State<Wrapper> {
             BottomNavigationBarItem(
                 icon: Icon(Icons.schedule, color: Colors.grey),
                 activeIcon: Icon(Icons.schedule, color: Colors.black),
-                label: "Notifications"),
-            // BottomNavigationBarItem(
-            //     icon: FaIcon(FontAwesomeIcons.userAlt, color: Colors.white70),
-            //     activeIcon: FaIcon(FontAwesomeIcons.userAlt, color: Colors.white),
-            //     label: "Profile"),
+                label: "Schedules"),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.healing, color: Colors.grey,),
+                activeIcon: Icon(Icons.healing, color: Colors.black,),
+                label: "Treatment"),
           ],
           onTap: (index) {
             setState(() {
@@ -117,7 +126,7 @@ class _WrapperState extends State<Wrapper> {
             } else if (details.primaryVelocity! < 0) {
               // User swiped Right
 
-              if (currentIndex != 2) {
+              if (currentIndex != 3) {
                 setState(() {
                   currentIndex++;
                 });
